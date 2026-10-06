@@ -1,0 +1,65 @@
+name: Deploy Backend - Ultradium Trading
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Backend to Contabo VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Deploy to VPS
+      - name: Deploy Backend
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+
+          script: |
+            set -e
+
+            echo "======================================"
+            echo "Starting Ultradium Backend Deployment"
+            echo "======================================"
+
+            cd /var/www/ultradium/backend
+
+            echo "Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Creating environment file..."
+
+            cat > .env <<'EOF'
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            CLIENT_ORIGIN=${{ secrets.CLIENT_ORIGIN }}
+            PORT=5061
+            EOF
+
+            echo "Installing dependencies..."
+            npm install --production
+
+            echo "Restarting backend..."
+
+            if pm2 describe ultradium-backend > /dev/null 2>&1; then
+              pm2 restart ultradium-backend --update-env
+            else
+              pm2 start npm --name "ultradium-backend" -- start
+            fi
+
+            pm2 save
+
+            echo "======================================"
+            echo "Ultradium Backend Deployment Complete"
+            echo "======================================"
+
+            pm2 status ultradium-backend
