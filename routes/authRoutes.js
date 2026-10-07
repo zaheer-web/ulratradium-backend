@@ -64,7 +64,7 @@ router.post("/change-email", changeEmail);
 
 // ==========================================
 // VERIFY EMAIL CHANGE
-// POST /api/auth/verify-email-change
+// POST /api/auth/verify-email-changes
 // ==========================================
 router.post("/verify-email-change", verifyEmailChange);
 
