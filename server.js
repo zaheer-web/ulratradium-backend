@@ -1,11 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 import contactRoutes from "./routes/contactRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -28,8 +26,6 @@ app.use(
 
 app.use(express.json());
 
-app.use(cookieParser());
-
 // ==========================================
 // ROOT
 // ==========================================
@@ -44,11 +40,6 @@ app.get("/", (req, res) => {
 // CONTACT
 // ==========================================
 app.use("/api/contact", contactRoutes);
-
-// ==========================================
-// AUTH
-// ==========================================
-app.use("/api/auth", authRoutes);
 
 // ==========================================
 // SERVER
